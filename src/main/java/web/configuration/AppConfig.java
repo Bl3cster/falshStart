@@ -42,7 +42,7 @@ public class AppConfig extends AbstractAnnotationConfigDispatcherServletInitiali
         request.setCharacterEncoding("UTF-8");
         chain.doFilter(request, response);
     }
-    private void registerCharacterEncodingFilter(ServletContext aContext) {
+    private void registerCharacterEncodingFilter(ServletContext context) {
         EnumSet<DispatcherType> dispatcherTypes = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.ASYNC);
 
         CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
@@ -50,7 +50,7 @@ public class AppConfig extends AbstractAnnotationConfigDispatcherServletInitiali
         characterEncodingFilter.setForceEncoding(true);
         characterEncodingFilter.setForceResponseEncoding(true);
 
-        FilterRegistration.Dynamic characterEncoding = aContext.addFilter("characterEncoding", characterEncodingFilter);
+        FilterRegistration.Dynamic characterEncoding = context.addFilter("characterEncoding", characterEncodingFilter);
         characterEncoding.addMappingForUrlPatterns(dispatcherTypes, true, "/*");
     }
 }
