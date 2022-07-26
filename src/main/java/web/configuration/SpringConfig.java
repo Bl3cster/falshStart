@@ -26,8 +26,8 @@ public class SpringConfig {
     private Environment env;
 
     @Autowired
-    public SpringConfig(Environment env){
-        this.env=env;
+    public SpringConfig(Environment env) {
+        this.env = env;
     }
 
     @Bean
