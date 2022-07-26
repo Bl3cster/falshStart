@@ -4,12 +4,11 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import javax.servlet.*;
+import java.io.IOException;
+import java.util.EnumSet;
 
-public class AppConfig extends AbstractAnnotationConfigDispatcherServletInitializer {
+public class AppConfig extends AbstractAnnotationConfigDispatcherServletInitializer implements Filter {
 
 
     @Override
@@ -27,16 +26,10 @@ public class AppConfig extends AbstractAnnotationConfigDispatcherServletInitiali
         return new String[]{"/"};
     }
     @Override
-    public void onStartup(ServletContext aServletContext) throws ServletException {
-        super.onStartup(aServletContext);
-
-        FilterRegistration.Dynamic encodingFilter = aServletContext
-                .addFilter("encodingFilter", new CharacterEncodingFilter());
-        encodingFilter.setInitParameter("encoding", "UTF-8");
-        encodingFilter.setInitParameter("forceEncoding", "true");
-        encodingFilter.addMappingForUrlPatterns(null, true, "/");
-
-        registerHiddenFieldFilter(aServletContext);
+    public void onStartup(ServletContext servletContext) throws ServletException {
+        registerCharacterEncodingFilter(servletContext);
+        super.onStartup(servletContext);
+        registerHiddenFieldFilter(servletContext);
     }
 
     private void registerHiddenFieldFilter(ServletContext aContext) {
@@ -45,11 +38,19 @@ public class AppConfig extends AbstractAnnotationConfigDispatcherServletInitiali
     }
 
     @Override
-    protected Filter[] getServletFilters() {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        chain.doFilter(request, response);
+    }
+    private void registerCharacterEncodingFilter(ServletContext aContext) {
+        EnumSet<DispatcherType> dispatcherTypes = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.ASYNC);
+
         CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
         characterEncodingFilter.setEncoding("UTF-8");
         characterEncodingFilter.setForceEncoding(true);
-        return new Filter[] {characterEncodingFilter};
-    }
+        characterEncodingFilter.setForceResponseEncoding(true);
 
+        FilterRegistration.Dynamic characterEncoding = aContext.addFilter("characterEncoding", characterEncodingFilter);
+        characterEncoding.addMappingForUrlPatterns(dispatcherTypes, true, "/*");
+    }
 }
